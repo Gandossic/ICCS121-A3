@@ -42,7 +42,50 @@ void printCache()
 	}
 }
 
+//  part 2
+
 u_int32_t read_fifo(u_int32_t address){
+//init values
+unsigned int l1Set = getL1SetID(address);
+unsigned int l2Set = getL2setID(address);
+unsigned int l1Tag = getL1Tag(address);
+unsigned int l2Tag = getL2Tag(address);
+
+//tracking hits with a variable, -1 is the number used because a hit would never be in the negatives
+
+int l1_hit = -1;
+int l2_hit = -1;
+
+// Cheking for the hit on L1 
+for (int i = 0; i < 2; i++);
+	if (L1_cache[l1Set][i].tag == l1Tag){
+		l1_hit = i;
+		break;
+	}
+
+//if l1 miss
+if (l1_hit == -1){
+	for (int i = 0; i < 4; i++){
+		if (L2_cache[l2_set][i].tag == l2_tag){
+			l2_hit = i;
+			break;
+		}
+	}
+}
+
+//if l2 miss
+/*
+this means that data isnt in either l1 or 2
+meand that we need to access DRAM.
+
+bBUUT L2 might be full
+we have to kick someone out first
+the oldest piece of data
+just iterate thru, but now start from 0 so l2_hit will actually not be a hti but it will be set to 0 so we can use
+*/
+
+l2_hit = 0;
+u_int32_t min_time = L2_cache[l2_set][0].
 
 return 0;
 }
