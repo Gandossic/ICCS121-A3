@@ -166,6 +166,10 @@ NOTES:
    - 56 emoji characters
    - 285 hentaigana
    - 3 additional Zanabazar Square characters */
+
+
+
+
 /* 
  * sign - return 1 if positive, 0 if zero, and -1 if negative
  *  Examples: sign(130) = 1
@@ -174,9 +178,31 @@ NOTES:
  *  Max ops: 10
  *  Rating: 2
  */
+
+
 int sign(int x) {
-    return 2;
+/*
+EitherPosOrNeg checks for that by just shifting the numbers, eihter all 1's (-1) or all 0 (0)
+is_nonZero checks for any number but zero and returns -1 if that is true. getting the not of 0 + 1 just give 0 again. 
+means that nonzero gives (-1)
+0 gives 0
+return gives a few cases
+if positive number
+0 | -1 & 1 (which is 1 because -1 is all ones) = 1
+if zero 
+0 | 0  & 1(which is 0 because 0 is all 0's no match with 1) = 0
+if negative
+-1 | -1 & 1 (which is 1, reason above) = -1 (because -1 | 1 doesnt change anything, or 1 cannot add anything to something all 1s)
+*/
+  int isEither_Pos_And_0_OR_Neg = x >> 31;
+  int is_NonZero = (x |(~x + 1)) >> 31;
+  return isEither_Pos_And_0_OR_Neg|(is_NonZero & 1) ;
 }
+
+
+
+
+
 /* 
  * anyEvenBit - return 1 if any even-numbered bit in word set to 1
  *   Examples anyEvenBit(0xA) = 0, anyEvenBit(0xE) = 1
@@ -185,8 +211,35 @@ int sign(int x) {
  *   Rating: 2
  */
 int anyEvenBit(int x) {
-  return 2;
+/*
+so will want to built a bit mask, but cannot use number larger than 255
+can built with shifting maybe?
+255 is 1111 1111
+so can do 01 then just shift and or it until we get the full mask
+the bit mask is then used in NOT to get ONLY even numbers, then just checking if its non zero (meaning at least a 1 in an even bit) 
+*/
+  //construct bitmask of even numbers without technically calling a larger number than 255?
+  int bmask = 1;
+  int bmask = bmask | (bmask << 2);
+  bmask = bmask | (bmask << 4);
+  bmask = bmask | (bmask << 8);
+  bmask = bmask | (bmask << 16);
+
+  // Isolate even bits
+  int even_bits = x & bmask;
+    
+  // Use non-zero shift from the othe rone!!!
+  // gives -1 if any even bits are active, 0 if none are
+  int evens_exist = (even_bits | (~even_bits + 1)) >> 31;
+    
+  // Turn  -1 into a 1
+    return evens_exist & 1;
 }
+
+
+
+
+
 /* 
  * minusOne - return a value of -1 
  *   Legal ops: ! ~ & ^ | + << >>
@@ -194,8 +247,14 @@ int anyEvenBit(int x) {
  *   Rating: 1
  */
 int minusOne(void) {
-  return 2;
+  // ~0 is -1, all the zeros flip to ones, meaning that its -1, 
+  return ~0;
 }
+
+
+
+
+
 /* 
  * bitMask - Generate a mask consisting of all 1's 
  *   lowbit and highbit
@@ -207,8 +266,38 @@ int minusOne(void) {
  *   Rating: 3
  */
 int bitMask(int highbit, int lowbit) {
-  return 2;
+/*
+ * highbit shifting right comes with the problem of padding all ones, which does nothing to help with the bit masking
+ * so my idea is to just invert the number and left shift it.
+ */
+  int targetHighMask = 32 + (~highbit +1 );
+
+/*
+ * create a block of ones (i.e ~0 i.e -1)
+ * shift all those ones left by the target high mask.
+ * this means that we are left with 1's on the far left , however many there need be for highmask
+ * we invert this so that we can later push it back by the same amount of highbits to the right
+ */
+  int highmask = ~(~0 << targetHighMask);
+  
+// this is where things get pushed all the way to the right, with no leading 1's, thus creating the highmask.
+// we need to do target number for the ask -1 for this calculation to be correct
+  highmask = highmask >> (targetHighMask + ~0);
+  
+  //lowbit is easy
+  int lowmask = ~0 << lowbit;
+
+  //combine them together! 
+  int mask = highmask & lowmask;
+
+  return mask;
 }
+
+
+
+
+
+
 /* 
  * getByte - Extract byte n from word x
  *   Bytes numbered from 0 (LSB) to 3 (MSB)
@@ -218,8 +307,22 @@ int bitMask(int highbit, int lowbit) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-  return 2;
+/*
+ * 8 bits in 1 byte in 32 arch
+ * I will shift n to the left 3 times to get n * 8, that number will be the amount of bits we have to shift
+ * Then, we just shift to the left by that many bits, we'll have our value wanted at the leftmost.
+ * we can then just use AND to wipe out the unwanted numbers to the right. 
+ * because we only need the first 8 bits, we can use number 255 (0's followed by eight 1s.)to take out th other stuff
+ */
+
+ int shiftBits = n << 3;
+ int shiftWord = x >> shiftBits;
+ int extraction = shiftWord & 255;
+  return extraction;
 }
+
+
+
 /* 
  * absVal - absolute value of x
  *   Example: absVal(-1) = 1.
@@ -229,8 +332,23 @@ int getByte(int x, int n) {
  *   Rating: 4
  */
 int absVal(int x) {
-  return 2;
+  // need to just take the sign as a mask then 
+  // minus by the mask in the end if there is anything
+  mask = x >> 31;
+  //this leaves us with either 0 or -1
+  // means that we subtract either 0 or 1
+  val = x + mask;
+  // use an XOR to flipt the bits,
+  // if positive value then everything stays teh same 
+  // if neg then flips
+  return val ^ mask;
 }
+
+
+
+
+
+
 /*
  * bitCount - returns count of number of 1's in word
  *   Examples: bitCount(5) = 2, bitCount(7) = 3
@@ -238,8 +356,49 @@ int absVal(int x) {
  *   Max ops: 40
  *   Rating: 4
  */
+
+ /* Found this sample of couting bits on stackoverflow
+c = (v & 0x55555555) + ((v >> 1) & 0x55555555);
+c = (c & 0x33333333) + ((c >> 2) & 0x33333333);
+c = (c & 0x0F0F0F0F) + ((c >> 4) & 0x0F0F0F0F);
+c = (c & 0x00FF00FF) + ((c >> 8) & 0x00FF00FF);
+c = (c & 0x0000FFFF) + ((c >> 16)& 0x0000FFFF);
+USING THIS BUT EDITING IT TO FIT THE CRITERIA HERE
+  */
 int bitCount(int x) {
-  return 2;
+  // building 0x555... with the same trick we did to get larger numbers than 255
+  int mask1 = 0x55 | (0x55 << 8);
+  // so this now becomes 0x5555
+  mask1 = mask1 | (mask1 << 16);
+  //this becomes 0x55555555
+
+  // same with 0x333...
+  int mask2 = 0x33 | (0x33 << 8);
+  mask2 = mask2 | (mask2 << 16);
+  
+  int mask3 = 0x0F | (0x0F << 8);
+  mask3 = mask3 | (mask3 << 16);
+
+  x = (x & mask1) + ((x >>1) & mask1);
+  // so this masks every other bit
+  // then added by the same thing happening but shifted 1 to the left
+  // this essentially groups bits into 2 when adding them together
+
+  x = (x & mask2) + ((x >>2) & mask2);
+  // this is the same thing but groupting them into 4s now
+
+  x = (x & mask3) + ((x >>4) & mask3);  
+  //now 8s!
+
+  x = x + (x >> 8);
+  //16s, no mask needed
+
+  x = x + (x >> 16);
+  //32, now this sSHOULD be our number of 1's
+
+//need a way to capture only up to 32, which is going to be six individal bits from the leftmost
+  return x & 0x3F;
+
 }
 /* 
  * byteSwap - swaps the nth byte and the mth byte
@@ -269,8 +428,9 @@ int bang(int x) {
  *   Max ops: 4
  *   Rating: 1
  */
-int tmin(void) {
-  return 2;
+int tmin(void){
+//hopefully i understood this correctly? just shifting 1 to the most sig bit (right) to get the Biggest negative?
+  return 1 << 31;
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -291,7 +451,12 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+ 
+  // make sure that sign bit is stored somewhere, 
+  // then mask out the sign bit, make sure its always 0
+  // then right shift the whole thing
+  // then add back in the -1 later?
+    return 2 ;
 }
 /* 
  * negate - return -x 
@@ -301,7 +466,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x + 1;
 }
 /* 
  * greatestBitPos - return a mask that marks the position of the
@@ -322,5 +487,9 @@ int greatestBitPos(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+  int !(x >> 31);
+  //-1 turns into 0, 0 turns into 1
+  // need to handle 0 too
+  //double bang to check if x is 0, if it is then it will return 0 because of the AND :D 
+  return x & (!!x);
 }
