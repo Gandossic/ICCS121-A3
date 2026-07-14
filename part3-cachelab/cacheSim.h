@@ -7,6 +7,7 @@ typedef struct cb_struct {
     u_int32_t tag;
     u_int32_t timeStamp;   /// This is used to determine what to evict. You can update the timestamp using cycles.
 }cacheBlock;
+// OHH THIS IS WHERE THE TAG IS 
 
 
 typedef struct access {

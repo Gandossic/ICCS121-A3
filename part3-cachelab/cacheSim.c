@@ -42,46 +42,72 @@ void printCache()
 	}
 }
 
-u_int32_t read_fifo(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
+u_int32_t read_fifo(u_int32_t address){
+
 return 0;
 }
 
-int L1lookup(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
+
+
+//part 1
+
+
+
+int L1lookup(u_int32_t address){
+//use the functions I wrote below here :O 
+unsigned int SetId = getL1SetID(address);
+unsigned int tag = getL1Tag(address);
+// then do some i j loop thru all set row
+// only got 2 sets so the break condition for loop it > 2 (i.e 0 and 1)
+for (int i = 0; < 2; i++) {
+	if (L1_cache[SetId][i].tag == tag){
+		// checks in a "grid" for ID(row) and the current iteration i(column)
+		//took a while to find tag lol
+		return 1;
+		//means hit
+	} 
+}
 return 0;
+//means miss
 }
 
-int L2lookup(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
-return 0;
+int L2lookup(u_int32_t address){
+//exact same as the L1 but just 4 columns instead of 2
+unsigned int SetId = getL2SetID(address);
+unsigned int tag = getL2Tag(address);
+
+for (int i = 0; < 4; i++) {
+	if (L1_cache[SetId][i].tag == tag){
+
+		return 1;
+		//hit
+	} 
 }
 
-unsigned int getL1SetID(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
 return 0;
+//miss :C 
 }
 
-unsigned int getL2SetID(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
-return 0;
+
+unsigned int getL1SetID(u_int32_t address){
+return (address >> 4) & 1;
+//this returns the set id that is the largest bit, 
+// to make sure that we only return that one bit, we use AND to filter for that -now- leftmost bit.
 }
 
-unsigned int getL1Tag(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
-return 0;
+unsigned int getL2SetID(u_int32_t address){
+return (address >> 4) & 3;
+// same thing here but with different shifting amounts because we want two bits and filtering two bits.
 }
 
-unsigned int getL2Tag(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
-return 0;
+unsigned int getL1Tag(u_int32_t address){
+return address >> 5;
+// this is the set address shifted leftmost, dont need the and because its unsigned and theres nothing before the tag bits (padded 0s)
+}
+
+unsigned int getL2Tag(u_int32_t address){
+return address >> 6;
+// same Idea as the one above!!
 }
 
 
